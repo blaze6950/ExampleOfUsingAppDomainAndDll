@@ -1,8 +1,11 @@
 ﻿using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -19,19 +22,14 @@ namespace ExampleOfUsingAppDomainAndDll
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
+    [Serializable]
     public partial class MainWindow : Window
     {
-        private static List<AppDomain> _domains;
+        private static List<AppDomain> _domains = new List<AppDomain>();
 
         public MainWindow()
-        {
-            DllSateTextBlock.Text = "Unloaded";
-            InitializeComponent();
-            _domains = new List<AppDomain>();
-            FirstInitialize();
-            StateButton.IsEnabled = true;
-            StateButton.Content = "Unload";
-            DllSateTextBlock.Text = "Loaded";
+        {            
+            InitializeComponent();            
         }
 
         private void FirstInitialize()
@@ -54,20 +52,56 @@ namespace ExampleOfUsingAppDomainAndDll
 
         private string ChooseDirectory()
         {
-            var openFileDialog = new OpenFileDialog();
-            openFileDialog.Multiselect = false;
-            openFileDialog.ShowDialog();
-            return openFileDialog.SafeFileName;
+            Ookii.Dialogs.Wpf.VistaFolderBrowserDialog vistaFolderBrowserDialog = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog();
+            vistaFolderBrowserDialog.ShowDialog();
+            return vistaFolderBrowserDialog.SelectedPath;
         }
 
         private void LoadDllFromDirectory()
         {
-            LoadDllFromDirectory(System.Reflection.Assembly.GetExecutingAssembly().CodeBase);
+            LoadDllFromDirectory(System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().CodeBase.Remove(0, 8)));
         }
 
         private void LoadDllFromDirectory(String path)
         {
-            
+            if (path.Length > 0)
+            {
+                var files = Directory.GetFiles(path);
+                foreach (var file in files)
+                {
+                    if (System.IO.Path.GetExtension(file).Contains("dll"))
+                    {
+                        LoadDll(file);
+                    }
+                }
+            }
+        }
+
+        private void LoadDll(String path)
+        {
+            var d = AppDomain.CreateDomain($"{_domains.Count.ToString()} domain");
+            _domains.Add(d);
+            d.DomainUnload += d_DomainUnload;
+            d.Load(AssemblyName.GetAssemblyName(path));
+
+            Assembly assembly = Assembly.Load(AssemblyName.GetAssemblyName(path));
+            string namespaceDll = $"{System.IO.Path.GetFileNameWithoutExtension(path)}.Class1";
+            Type currentClass = assembly.GetType(namespaceDll);
+            var foundedInterface = currentClass?.GetInterface("IExtension");
+            if (foundedInterface != null)
+            {
+                ConstructorInfo ci = currentClass.GetConstructor(new Type[] { });
+                if (ci != null)
+                {
+                    IExtension newObj = (IExtension)ci.Invoke(new object[] { });
+                    MessageBox.Show(newObj.GetExtensionName());
+                }
+            }            
+        }        
+
+        static void d_DomainUnload(object sender, EventArgs e)
+        {
+            _domains.Remove(sender as AppDomain);
         }
 
         private void StateButton_Click(object sender, RoutedEventArgs e)
@@ -94,7 +128,25 @@ namespace ExampleOfUsingAppDomainAndDll
 
         private void UnloadAllDll()
         {
-            throw new NotImplementedException();
+            foreach (var domain in _domains)
+            {
+                domain.DomainUnload -= d_DomainUnload;                
+            }
+            _domains.Clear();
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            UnloadAllDll();
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            DllSateTextBlock.Text = "Unloaded";
+            FirstInitialize();
+            StateButton.IsEnabled = true;
+            StateButton.Content = "Unload";
+            DllSateTextBlock.Text = "Loaded";
         }
     }
 }

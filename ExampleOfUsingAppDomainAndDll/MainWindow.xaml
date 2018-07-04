@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ExampleOfUsingAppDomainAndDll"
         mc:Ignorable="d"
-        Title="ExtensionLoader" Height="315" Width="320">
+        Title="ExtensionLoader" Height="315" Width="320" Closing="Window_Closing" Loaded="Window_Loaded">
     <Grid Margin="10">
         <Grid.RowDefinitions>            
             <RowDefinition></RowDefinition>

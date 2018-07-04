@@ -12,7 +12,7 @@ namespace ThirdClassLibrary
     {
         public string GetExtensionName()
         {
-            return Assembly.GetEntryAssembly().GetName().Name;
+            return Assembly.GetExecutingAssembly().GetName().Name;
         }
     }
 }
