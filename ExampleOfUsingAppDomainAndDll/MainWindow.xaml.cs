@@ -21,10 +21,13 @@ namespace ExampleOfUsingAppDomainAndDll
     /// </summary>
     public partial class MainWindow : Window
     {
+        private static List<AppDomain> _domains;
+
         public MainWindow()
         {
             DllSateTextBlock.Text = "Unloaded";
             InitializeComponent();
+            _domains = new List<AppDomain>();
             FirstInitialize();
             StateButton.IsEnabled = true;
             StateButton.Content = "Unload";
