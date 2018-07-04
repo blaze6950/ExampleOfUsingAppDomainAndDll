@@ -24,5 +24,10 @@ namespace ExampleOfUsingAppDomainAndDll
         {
             InitializeComponent();
         }
+
+        private void StateButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }

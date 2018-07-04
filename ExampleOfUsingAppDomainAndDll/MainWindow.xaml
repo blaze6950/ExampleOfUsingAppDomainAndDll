@@ -5,8 +5,31 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ExampleOfUsingAppDomainAndDll"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
-        
+        Title="ExtensionLoader" Height="315" Width="320">
+    <Grid Margin="10">
+        <Grid.RowDefinitions>            
+            <RowDefinition></RowDefinition>
+            <RowDefinition></RowDefinition>
+            <RowDefinition></RowDefinition>            
+        </Grid.RowDefinitions>
+
+        <GroupBox Grid.Row="0">            
+            <GroupBox.Header>
+                <TextBlock FontSize="16">Dll state:</TextBlock>
+            </GroupBox.Header>
+            
+            <TextBlock FontSize="16" Name="DllSateTextBlock"></TextBlock>            
+        </GroupBox>
+
+        <GroupBox Grid.Row="1">
+            <GroupBox.Header>
+                <TextBlock FontSize="16">Result:</TextBlock>
+            </GroupBox.Header>
+
+            <TextBlock FontSize="16" Name="ResultTextBlock"></TextBlock>
+        </GroupBox>
+
+        <Button Grid.Row="2" IsEnabled="False" Name="StateButton" Click="StateButton_Click" Margin="5" FontSize="16">Load</Button>
+
     </Grid>
 </Window>
