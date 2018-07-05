@@ -18,7 +18,7 @@
                 <TextBlock FontSize="16">Dll state:</TextBlock>
             </GroupBox.Header>
             
-            <TextBlock FontSize="16" Name="DllSateTextBlock"></TextBlock>            
+            <TextBlock FontSize="16" Name="DllSateTextBlock" HorizontalAlignment="Center" VerticalAlignment="Center"></TextBlock>            
         </GroupBox>
 
         <GroupBox Grid.Row="1">
@@ -26,7 +26,8 @@
                 <TextBlock FontSize="16">Result:</TextBlock>
             </GroupBox.Header>
 
-            <TextBlock FontSize="16" Name="ResultTextBlock"></TextBlock>
+            <ListView Name="ResultListView"/>
+
         </GroupBox>
 
         <Button Grid.Row="2" IsEnabled="False" Name="StateButton" Click="StateButton_Click" Margin="5" FontSize="16">Load</Button>

@@ -1,6 +1,7 @@
 ﻿using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -26,10 +27,21 @@ namespace ExampleOfUsingAppDomainAndDll
     public partial class MainWindow : Window
     {
         private static List<AppDomain> _domains = new List<AppDomain>();
+        private ObservableCollection<String> _trueDomains = new ObservableCollection<string>();
+
+        public ObservableCollection<string> TrueDomains
+        {
+            get => _trueDomains;
+            set
+            {
+                _trueDomains = value;
+            }
+        }
 
         public MainWindow()
         {            
-            InitializeComponent();            
+            InitializeComponent();
+            ResultListView.ItemsSource = _trueDomains;
         }
 
         private void FirstInitialize()
@@ -94,7 +106,9 @@ namespace ExampleOfUsingAppDomainAndDll
                 if (ci != null)
                 {
                     IExtension newObj = (IExtension)ci.Invoke(new object[] { });
-                    MessageBox.Show(newObj.GetExtensionName());
+                    var res = newObj.GetExtensionName();
+                    TrueDomains.Add(res);
+                    MessageBox.Show(res);
                 }
             }            
         }        
@@ -133,6 +147,7 @@ namespace ExampleOfUsingAppDomainAndDll
                 domain.DomainUnload -= d_DomainUnload;                
             }
             _domains.Clear();
+            TrueDomains.Clear();
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
