@@ -26,9 +26,12 @@ namespace ExampleOfUsingAppDomainAndDll
     [Serializable]
     public partial class MainWindow : Window
     {
+        [NonSerialized]
         private static List<AppDomain> _domains = new List<AppDomain>();
-        private ObservableCollection<String> _trueDomains = new ObservableCollection<string>();
 
+        [NonSerialized]
+        private ObservableCollection<String> _trueDomains = new ObservableCollection<string>();
+                
         public ObservableCollection<string> TrueDomains
         {
             get => _trueDomains;
@@ -93,9 +96,16 @@ namespace ExampleOfUsingAppDomainAndDll
         {
             var d = AppDomain.CreateDomain($"{_domains.Count.ToString()} domain");
             _domains.Add(d);
-            d.DomainUnload += d_DomainUnload;
-            d.Load(AssemblyName.GetAssemblyName(path));
+            d.DomainUnload += d_DomainUnload;            
+            d.SetData("Path", path);
+            //d.SetData("List", _trueDomains);
+            d.DoCallBack(() => LoadAssembly_CALLBACK());
+        }        
 
+        static void LoadAssembly_CALLBACK()
+        {
+            string path = (String)AppDomain.CurrentDomain.GetData("Path");
+            //ObservableCollection<String> listView = (ObservableCollection<String>)AppDomain.CurrentDomain.GetData("List");
             Assembly assembly = Assembly.Load(AssemblyName.GetAssemblyName(path));
             string namespaceDll = $"{System.IO.Path.GetFileNameWithoutExtension(path)}.Class1";
             Type currentClass = assembly.GetType(namespaceDll);
@@ -107,11 +117,11 @@ namespace ExampleOfUsingAppDomainAndDll
                 {
                     IExtension newObj = (IExtension)ci.Invoke(new object[] { });
                     var res = newObj.GetExtensionName();
-                    TrueDomains.Add(res);
+                    //listView.Add(res);
                     MessageBox.Show(res);
                 }
-            }            
-        }        
+            }
+        }
 
         static void d_DomainUnload(object sender, EventArgs e)
         {
@@ -143,8 +153,9 @@ namespace ExampleOfUsingAppDomainAndDll
         private void UnloadAllDll()
         {
             foreach (var domain in _domains)
-            {
-                domain.DomainUnload -= d_DomainUnload;                
+            {                
+                domain.DomainUnload -= d_DomainUnload;
+                AppDomain.Unload(domain);
             }
             _domains.Clear();
             TrueDomains.Clear();
